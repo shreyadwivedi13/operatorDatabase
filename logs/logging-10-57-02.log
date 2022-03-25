@@ -1,0 +1,11 @@
+2022-03-25 10:46:47,460 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 10:46:47,467 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 10:46:47,468 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 10:46:47,468 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 10:46:47,468 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 10:46:47,468 INFO a.j.MobileOperatorDatabase [main] print all messages received by * from any number
+2022-03-25 10:46:47,469 INFO a.j.MobileOperatorDatabase [main] print all messages sent from XXXX to YYYY
+2022-03-25 10:46:47,470 INFO a.j.MobileOperatorDatabase [main] print all messages received by * from Punjab number
+2022-03-25 10:46:47,471 INFO a.j.MobileOperatorDatabase [main] print all messages received by * from Airtel Punjab number
+2022-03-25 10:46:47,472 INFO a.j.MobileOperatorDatabase [main] print all messages received by * from Airtel Punjab number
+2022-03-25 10:46:47,473 INFO a.j.MobileOperatorDatabase [main] print all messages those were sent from Punjab number but FAILED

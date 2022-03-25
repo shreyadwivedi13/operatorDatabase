@@ -1,0 +1,11 @@
+2022-03-25 16:28:34,380 INFO a.j.MobileOperatorDatabase [main] HNY!
+2022-03-25 16:28:34,385 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 16:28:34,385 INFO a.j.MobileOperatorDatabase [main] print all messages received by * from Punjab number
+2022-03-25 16:28:34,386 INFO a.j.MobileOperatorDatabase [main] NO!
+2022-03-25 16:28:34,386 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 16:28:34,386 INFO a.j.MobileOperatorDatabase [main] print all messages received by * from Airtel Punjab number
+2022-03-25 16:28:34,387 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 16:28:34,387 INFO a.j.MobileOperatorDatabase [main] print all messages received from 98786912** ( here * mean it can by any two digit, i.e. messages from 9878691291,92,93,94,95 etc..) by **.
+2022-03-25 16:28:34,388 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 16:28:34,389 INFO a.j.MobileOperatorDatabase [main] Hii!
+2022-03-25 16:28:34,389 INFO a.j.MobileOperatorDatabase [main] print all messages those were sent from Punjab number but FAILED

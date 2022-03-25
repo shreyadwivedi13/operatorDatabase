@@ -41,25 +41,27 @@ public class MobileOperatorDatabase {
 		ResultSet rs = null;
 		Connection con= null;
 		con = DriverManager.getConnection(databaseURL, user, password);
-		boolean exists= true;
+		
 		if (con != null) {
 			
 			log.info("Checking if a database exists");
 			rs = con.getMetaData().getCatalogs();
-			
+			boolean exists= false;
 			while(rs.next()){
 				String catalogs = rs.getString(1);
 				
 				if(dbName.equals(catalogs)){
 				System.out.println("the database "+dbName+" exists");
 				exists= true;
+				break;
 				}
 				else {
 					exists= false;
+					System.out.println("oyoy");
 				}
 				}
-		 log.info("db exists: ", exists);
-				}
+		 log.info("db exists: "+ exists);
+				
 				if(exists== false) {
 					log.info("no database found with this name so creating new database");
 					Statement statement = con.createStatement();
@@ -68,7 +70,7 @@ public class MobileOperatorDatabase {
 					log.info("Database with name " + dbName + " created.");
 				
 				}
-
+		}
 	}
 
 	public static void CreateAndPopulateTables(String databaseURL, String dbName, String user, String password)
@@ -133,7 +135,7 @@ public class MobileOperatorDatabase {
 
 		ps.executeBatch();
 		// creating second table for saving message details.
-		String sql1 = "CREATE TABLE MSG_DETAILS " + "(from BIGINT not NULL, " + " to BIGINT not NULL, " + " message VARCHAR(225) not NULL," + " fromOperator VARCHAR(255), " + " toOperator VARCHAR(255), " + " FromRegion VARCHAR(255), " + " toRegion VARCHAR(255), " + " sentTime VARCHAR(255), "+ " recievedTime VARCHAR(255) ," + " deliveryStatus VARCHAR(255)" + ")";
+		String sql1 = "CREATE TABLE MSG_DETAILS " + "(sentFrom BIGINT not NULL, " + " sentTo BIGINT not NULL, " + " message VARCHAR(255) not NULL," + " fromOperator VARCHAR(255), " + " toOperator VARCHAR(255), " + " FromRegion VARCHAR(255), " + " toRegion VARCHAR(255), " + " sentTime VARCHAR(255), "+ " recievedTime VARCHAR(255) ," + " deliveryStatus VARCHAR(255)" + ")";
 
 		statement.execute(sql1);
 		//inserting values in the second table.
@@ -141,49 +143,61 @@ public class MobileOperatorDatabase {
 		String newsql = "INSERT into MSG_DETAILS values(9872900001,981490000,'Hey',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 7 NOV,2017','12:56; 7 NOV,2017','Received')";
 		statement.addBatch(newsql);
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981400000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 7 NOV,2017','12:56; 7 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 7 NOV,2017','12:56; 7 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9867900301,981450000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98679 ),(SELECT operator from OPERATOR_DETAILS where ranges=98145),(SELECT region from OPERATOR_DETAILS where ranges=98679 ),(SELECT region from OPERATOR_DETAILS where ranges=98145),'12:56; 7 NOV,2017','11:10; 7 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9867900301,9814500000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98679 ),(SELECT operator from OPERATOR_DETAILS where ranges=98145),(SELECT region from OPERATOR_DETAILS where ranges=98679 ),(SELECT region from OPERATOR_DETAILS where ranges=98145),'12:56; 7 NOV,2017','11:10; 7 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9832777777,981400000,'??',(SELECT operator from OPERATOR_DETAILS where ranges=98327 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98327 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 6 NOV,2017','12:56; 7 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9832777777,9814000000,'??',(SELECT operator from OPERATOR_DETAILS where ranges=98327 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98327 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 6 NOV,2017','12:56; 7 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814200000,983277777,'HBD!',(SELECT operator from OPERATOR_DETAILS where ranges=98142 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98142 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 17 NOV,2017','12:56; 17 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9814200000,9832777777,'HBD!',(SELECT operator from OPERATOR_DETAILS where ranges=98142 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98142 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 17 NOV,2017','12:56; 17 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,983277777,'HNY!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 8 NOV,2017','12:56; 17 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9832777777,'HNY!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 8 NOV,2017','12:56; 17 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814078900,981400000,'HI!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 17 NOV,2017','12:56; 17 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9814078900,9814000000,'HI!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 17 NOV,2017','12:56; 17 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814078900,981400000,'HBD!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 26 NOV,2017','12:56; 27 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9814078900,9814000000,'HBD!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 26 NOV,2017','12:56; 27 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981400000,'HNY!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 3 NOV,2017','12:56; 7 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9814000000,'HNY!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 3 NOV,2017','12:56; 7 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981420000,'BYE!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),'12:56; 4 NOV,2017','12:56; 7 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9814200000,'BYE!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),'12:56; 4 NOV,2017','12:56; 7 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981400000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 11 NOV,2017','12:56; 17 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 11 NOV,2017','12:56; 17 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9867900301,981450000,'BYE!',(SELECT operator from OPERATOR_DETAILS where ranges=98679 ),(SELECT operator from OPERATOR_DETAILS where ranges=98145),(SELECT region from OPERATOR_DETAILS where ranges=98679 ),(SELECT region from OPERATOR_DETAILS where ranges=98145),'12:56; 13 NOV,2017','12:56; 13 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9867900301,9814500000,'BYE!',(SELECT operator from OPERATOR_DETAILS where ranges=98679 ),(SELECT operator from OPERATOR_DETAILS where ranges=98145),(SELECT region from OPERATOR_DETAILS where ranges=98679 ),(SELECT region from OPERATOR_DETAILS where ranges=98145),'12:56; 13 NOV,2017','12:56; 13 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9832777777,981400000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98327 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98327 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 13 NOV,2017','12:56; 13 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9832777777,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98327 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98327 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 13 NOV,2017','12:56; 13 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814200000,983277777,'NO!',(SELECT operator from OPERATOR_DETAILS where ranges=98142 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98142 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 6 NOV,2017','12:56; 7 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9814200000,9832777777,'NO!',(SELECT operator from OPERATOR_DETAILS where ranges=98142 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98142 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 6 NOV,2017','12:56; 7 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,983277777,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 12 NOV,2017','12:56; 14 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9832777777,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),'12:56; 12 NOV,2017','12:56; 14 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814078900,981400000,'YES!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 4 NOV,2017','12:56; 4 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9814078900,9814000000,'YES!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 4 NOV,2017','12:56; 4 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814078900,981400000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 9 NOV,2017','12:56; 10 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9814078900,9814000000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98109),'12:56; 9 NOV,2017','12:56; 10 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981400000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 17 NOV,2017','12:56; 28 NOV,2017','Received')");
+				"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 17 NOV,2017','12:56; 28 NOV,2017','Received')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981420000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),'12:56; 17 NOV,2017','','NOT recieved')");
+				"INSERT into MSG_DETAILS values(9872600301,9814200000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),'12:56; 17 NOV,2017','','NOT recieved')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9814078900,981400000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 9 NOV,2017','','NOT recieved')");
+				"INSERT into MSG_DETAILS values(9814678900,9814000000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98146 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98146 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),'12:56; 9 NOV,2017','','NOT recieved')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981400000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 17 NOV,2017','','NOT recieved')");
+				"INSERT into MSG_DETAILS values(9872600301,9814900000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 17 NOV,2017','','NOT recieved')");
 		statement.addBatch(
-				"INSERT into MSG_DETAILS values(9872900301,981420000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),'12:56; 17 NOV,2017','','NOT recieved')");
-
+				"INSERT into MSG_DETAILS values(9872600301,9814200000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),'12:56; 17 NOV,2017','','NOT recieved')");
+		statement.addBatch(
+				"INSERT into MSG_DETAILS values(9814660000,9872900301,'NO!',(SELECT operator from OPERATOR_DETAILS where ranges=98146 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98146 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),'12:56; 6 NOV,2017','12:56; 7 NOV,2017','Received')");
+		statement.addBatch(
+				"INSERT into MSG_DETAILS values(9872760302,9872900301,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),'12:56; 12 NOV,2017','12:56; 14 NOV,2017','Received')");
+		statement.addBatch(
+				"INSERT into MSG_DETAILS values(9814078900,9872900301,'YES!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),'12:56; 4 NOV,2017','12:56; 4 NOV,2017','Received')");
+		statement.addBatch(
+				"INSERT into MSG_DETAILS values(9814078900,9872900301,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),'12:56; 9 NOV,2017','12:56; 10 NOV,2017','Received')");
+		statement.addBatch(
+				"INSERT into MSG_DETAILS values(9872900301,9878691266,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98786),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98786),'12:56; 17 NOV,2017','12:56; 28 NOV,2017','Received')");
+		statement.addBatch(
+				"INSERT into MSG_DETAILS values(9872900301,9878691290,'Hii!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98786),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98786),'12:56; 17 NOV,2017','','NOT recieved')");
 		statement.executeBatch();
+		
 	}
 
 	public static void finalQueryOutputs(String dbURL, String dbName, String user, String password)
@@ -202,69 +216,76 @@ public class MobileOperatorDatabase {
 		 * long phone1= 9872900301; long phone2= 9832777777;
 		 */
 		log.info("print all messages sent from *** number To any number.");
-		String query1 = "SELECT message from MSG_DETAILS where From = 9872900301";
+		String query1 = "SELECT message from MSG_DETAILS where sentFrom = 9872900301";
 		ResultSet result1 = statement.executeQuery(query1);
 		while (result1.next()) {
 			log.info(result1.getString("message"));
 		}
 		log.info("print all messages received by * from any number");
-		String query2 = "SELECT message from MSG_DETAILS where To = 9872900301";
+		String query2 = "SELECT message from MSG_DETAILS where sentTo = 9872900301";
 		ResultSet result2 = statement.executeQuery(query2);
 		while (result2.next()) {
 			log.info(result2.getString("message"));
 		}
 		log.info("print all messages sent from XXXX to YYYY");
-		String query3 = " SELECT message from MSG_DETAILS where From = 9872900301 and To = 9832777777";
+		String query3 = " SELECT message from MSG_DETAILS where sentFrom = 9872900301 and sentTo = 9832777777";
 		ResultSet result3 = statement.executeQuery(query3);
 		while (result3.next()) {
 			log.info(result3.getString("message"));
 		}
 		log.info("print all messages received by * from Punjab number");
-		String query4 = "SELECT message from MSG_DETAILS where To = 9872900301 and fromRegion = 'Punjab' ";
+		String query4 = "SELECT message from MSG_DETAILS where sentTo = 9872900301 and fromRegion = 'Punjab' ";
 		ResultSet result4 = statement.executeQuery(query4);
 		while (result4.next()) {
 			log.info(result4.getString("message"));
 		}
 		log.info("print all messages received by * from Airtel Punjab number");
-		String query5 = "SELECT message from MSG_DETAILS where To= 9872900301 and fromOperator= 'Airtel' and fromRegion = 'Punjab'";
+		String query5 = "SELECT message from MSG_DETAILS where sentTo= 9872900301 and fromOperator= 'Airtel' and fromRegion = 'Punjab'";
 		ResultSet result5 = statement.executeQuery(query5);
 		while (result5.next()) {
 			log.info(result5.getString("message"));
 		}
-		log.info("print all messages received by * from Airtel Punjab number");
-		String query6 = "SELECT message from MSG_DETAILS where To LIKE '98786912__' and From = 9872900301";
+		log.info("print all messages received from 98786912** ( here * mean it can by any two digit, i.e. messages from 9878691291,92,93,94,95 etc..) by **.");
+		String query6 = "SELECT message from MSG_DETAILS where sentTo LIKE '98786912__' and sentFrom = 9872900301";
 		ResultSet result6 = statement.executeQuery(query6);
 		while (result6.next()) {
 			log.info(result6.getString("message"));
 		}
 		log.info("print all messages those were sent from Punjab number but FAILED");
-		String query7 = "SELECT message from MSG_DETAILS where fromRegion = 'Punjab' and deliveryStatus ='NOT recieve'";
+		String query7 = "SELECT message from MSG_DETAILS where fromRegion = 'Punjab' and deliveryStatus ='NOT recieved'";
 		ResultSet result7 = statement.executeQuery(query7);
 		while (result7.next()) {
 			log.info(result7.getString("message"));
 		}
 	}
 	public static void resourceIntializer() throws Exception {
-		ReadConfigFile.getFile();
+		try{
+			ReadConfigFile.getFile();}
+		catch(Exception e) {
+			throw new Exception("couldn't load the configfile.");
+		}
 	}
 
 	public static void main(String[] args) throws Exception {
 		// Class.forName("com.mysql.jdbc.Driver");
 		resourceIntializer();
-
+		String databaseURL = ReadConfigFile.getResources("databaseURL");
+		System.out.println(databaseURL);
 		String user = ReadConfigFile.getResources("user");
+		System.out.println(user);
 		if (user == null) {
 			user = USER;
 		}
 		String password = ReadConfigFile.getResources("password");
+		System.out.println(password);
 		if (password == null) {
 			password = PASSWORD;
 		}
-		String databaseURL = ReadConfigFile.getResources("databaseURL");
+		
 		if (databaseURL == null) {
 			databaseURL = DB_URL;
 		}
-		String dbName = "m6";
+		String dbName = "m16";
 		checkDatabase(databaseURL, dbName, user, password);
 
 		CreateAndPopulateTables(databaseURL, dbName, user, password);

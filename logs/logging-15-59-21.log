@@ -1,0 +1,13 @@
+2022-03-25 15:59:21,496 INFO a.j.MobileOperatorDatabase [main] Checking if a database exists
+2022-03-25 15:59:21,526 INFO a.j.MobileOperatorDatabase [main] db exists: false
+2022-03-25 15:59:21,526 INFO a.j.MobileOperatorDatabase [main] no database found with this name so creating new database
+2022-03-25 15:59:21,532 INFO a.j.MobileOperatorDatabase [main] Database with name m14 created.
+2022-03-25 15:59:21,821 INFO a.j.MobileOperatorDatabase [main] print all messages sent from *** number To any number.
+2022-03-25 15:59:21,822 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] HNY!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] HNY!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] BYE!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] Hey!
+2022-03-25 15:59:21,823 INFO a.j.MobileOperatorDatabase [main] Hey!

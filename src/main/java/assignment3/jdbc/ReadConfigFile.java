@@ -10,14 +10,14 @@ package assignment3.jdbc;
 
 	public class ReadConfigFile {
 
-		static Logger logger = LogManager.getLogger(MobileOperatorDatabase.class.getName());
+		static Logger log = LogManager.getLogger(MobileOperatorDatabase.class.getName());
 		public static Properties property = new Properties();
 
 		// the following function returns the properties instance which can be used
 		// to access the configuration files
 		public static void getFile()throws Exception {
 			// try with resources to open and access the configuration file
-			try (FileInputStream propertyfile = new FileInputStream("./src/main/resources/configFile.properties")) {
+			try (FileInputStream propertyfile = new FileInputStream("./src/main/resources/configFile.properties");) {
 				property.load(propertyfile);
 			}
 			// logs the error and exists the system in case of empty config file
