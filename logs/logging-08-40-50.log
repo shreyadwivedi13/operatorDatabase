@@ -1,0 +1,11 @@
+2022-03-25 08:33:13,322 INFO a.j.MobileOperatorDatabase [main] Database exist : false
+2022-03-25 08:33:13,329 INFO a.j.MobileOperatorDatabase [main] no database found with this name so creating new database
+2022-03-25 08:33:13,334 INFO a.j.MobileOperatorDatabase [main] Database with name m1 created.
+2022-03-25 08:34:10,790 INFO a.j.MobileOperatorDatabase [main] Checking if a database exists
+2022-03-25 08:34:10,834 INFO a.j.MobileOperatorDatabase [main] Database exist : false
+2022-03-25 08:34:10,835 INFO a.j.MobileOperatorDatabase [main] no database found with this name so creating new database
+2022-03-25 08:34:10,842 INFO a.j.MobileOperatorDatabase [main] Database with name m2 created.
+2022-03-25 08:37:13,513 INFO a.j.MobileOperatorDatabase [main] Checking if a database exists
+2022-03-25 08:37:13,554 INFO a.j.MobileOperatorDatabase [main] Database exist : false
+2022-03-25 08:37:13,555 INFO a.j.MobileOperatorDatabase [main] no database found with this name so creating new database
+2022-03-25 08:37:13,562 INFO a.j.MobileOperatorDatabase [main] Database with name m3 created.
