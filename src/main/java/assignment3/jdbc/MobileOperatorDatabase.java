@@ -41,37 +41,33 @@ public class MobileOperatorDatabase {
 		ResultSet rs = null;
 		Connection con= null;
 		con = DriverManager.getConnection(databaseURL, user, password);
+		boolean exists= true;
 		if (con != null) {
 			
 			log.info("Checking if a database exists");
 			rs = con.getMetaData().getCatalogs();
-			boolean dbExists = true;
-			while (rs.next()) {
+			
+			while(rs.next()){
 				String catalogs = rs.getString(1);
 				
-				if (dbName.equals(catalogs)) {
-					dbExists = true;
-					break;
-				} else {
-					dbExists = false;
+				if(dbName.equals(catalogs)){
+				System.out.println("the database "+dbName+" exists");
+				exists= true;
 				}
-
-			}
-			log.info("Database exist : " + dbExists);
-			if(dbExists== true) {
-				Statement statement = con.createStatement();
-				String sql = "DROP DATABASE DBNAME";
-				statement.executeUpdate(sql);
-			}
-			if (dbExists == false) {
-				log.info("no database found with this name so creating new database");
-				Statement statement = con.createStatement();
-				String sql = "CREATE DATABASE " + dbName;
-				statement.executeUpdate(sql);
-				log.info("Database with name " + dbName + " created.");
-			}
-
-		}
+				else {
+					exists= false;
+				}
+				}
+		 log.info("db exists: ", exists);
+				}
+				if(exists== false) {
+					log.info("no database found with this name so creating new database");
+					Statement statement = con.createStatement();
+					String sql = "CREATE DATABASE " + dbName;
+					statement.executeUpdate(sql);
+					log.info("Database with name " + dbName + " created.");
+				
+				}
 
 	}
 
@@ -141,6 +137,7 @@ public class MobileOperatorDatabase {
 
 		statement.execute(sql1);
 		//inserting values in the second table.
+		
 		String newsql = "INSERT into MSG_DETAILS values(9872900001,981490000,'Hey',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),'12:56; 7 NOV,2017','12:56; 7 NOV,2017','Received')";
 		statement.addBatch(newsql);
 		statement.addBatch(
@@ -267,7 +264,7 @@ public class MobileOperatorDatabase {
 		if (databaseURL == null) {
 			databaseURL = DB_URL;
 		}
-		String dbName = "m5";
+		String dbName = "m6";
 		checkDatabase(databaseURL, dbName, user, password);
 
 		CreateAndPopulateTables(databaseURL, dbName, user, password);
