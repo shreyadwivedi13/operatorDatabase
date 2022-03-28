@@ -29,16 +29,19 @@ import org.apache.logging.log4j.Logger;
 public class MobileOperatorDatabase {
 
 	public static final Logger log = LogManager.getLogger(MobileOperatorDatabase.class.getName());
-	
-	/* @param -database URL, name, userid, password.
-	 * @throws
-	 * checking if the database already exists or not, if not then creating a
-	 * database with required dbName and then calling operator table creation
+
+	/*
+	 * @param -database name
+	 * 
+	 * @param - connection
+	 * 
+	 * @throws checking if the database already exists or not, if not then creating
+	 * a database with required dbName and then calling operator table creation
 	 * function otherwise directly the query function will be called from main.
 	 * 
 	 */
 	public static void checkDatabase(String dbName, Connection con) throws Exception {
-		
+
 		ResultSet rs = null;
 		try {
 			if (con != null) {
@@ -48,7 +51,7 @@ public class MobileOperatorDatabase {
 				boolean exists = false;
 				while (rs.next()) {
 					String catalogs = rs.getString(1);
-					//log.info(catalogs);
+					// log.info(catalogs);
 					if (dbName.equals(catalogs)) {
 						System.out.println("the database " + dbName + " exists");
 						exists = true;
@@ -66,9 +69,9 @@ public class MobileOperatorDatabase {
 					String sql = "CREATE DATABASE " + dbName;
 					statement.executeUpdate(sql);
 					log.info("Database with name " + dbName + " created.");
-					String selectDb = "USE " + dbName; //selecting database
-			         statement.executeUpdate(selectDb);
-			         System.out.println(selectDb);
+					String selectDb = "USE " + dbName; // selecting database
+					statement.executeUpdate(selectDb);
+					System.out.println(selectDb);
 					CreateAndPopulateOperatorTable(con);
 
 				}
@@ -79,19 +82,25 @@ public class MobileOperatorDatabase {
 
 		}
 	}
+
 	/*
-	 * this function will create OPERATOR_DETAILS table which will have specified
-	 * ranges divided in operators and regions and will connect to the MSG_Detail function if it runs properly otherwise will throw and error.
+	 * @param ->database name
+	 * 
+	 * @param ->connection
+	 * 
+	 * @throws this function will create OPERATOR_DETAILS table which will have
+	 * specified ranges divided in operators and regions and will connect to the
+	 * MSG_Detail function if it runs properly otherwise will throw and error.
 	 * input:
 	 */
-	public static void CreateAndPopulateOperatorTable(Connection con)
-			throws Exception {
-		
-		String[] regions = new String[] { "UP", "HP", "MP", "Kerala", "Goa",  "Punjab","Assam","Haryana", "Bihar",
+	public static void CreateAndPopulateOperatorTable(Connection con) throws Exception {
+
+		String[] regions = new String[] { "UP", "HP", "MP", "Kerala", "Goa",  "Assam","Punjab", "Haryana", "Bihar",
 				"Karnataka" };
 		// creating a string of all the regions of the operator
 
-		try {Statement statement = con.createStatement();
+		try {
+			Statement statement = con.createStatement();
 			// creating table1 ie OPERATOR_DETAILS which will have the ranges of the
 			// operators and their regions.
 			String sql = "CREATE TABLE OPERATOR_DETAILS " + "(ranges INTEGER , " + " operator VARCHAR(255), "
@@ -122,7 +131,7 @@ public class MobileOperatorDatabase {
 			}
 
 			// specifying range for regions of Vodafone operator
-			int vodaRange = 70180;
+			int vodaRange = 98670;
 			for (int i = 0; i < regions.length; i++) {
 				ps.setInt(1, vodaRange);
 				ps.setString(2, "Vodafone");
@@ -132,7 +141,7 @@ public class MobileOperatorDatabase {
 			}
 
 			// specifying range for regions of Jio operator
-			int jioRange = 94590;
+			int jioRange = 98320;
 
 			for (int i = 0; i < regions.length; i++) {
 				ps.setInt(1, jioRange);
@@ -152,13 +161,18 @@ public class MobileOperatorDatabase {
 		}
 	}
 
-	public static void CreateAndPopulateMSGTable(Connection con)
-			throws Exception {
-		/*
-		 * second table function create MSG_DETAILS table which will have info about msg
-		 * sent and received.
-		 */
-		try {Statement statement = con.createStatement();
+	/*
+	 * @param ->database name
+	 * 
+	 * @param ->connection
+	 * 
+	 * @throws second table function create MSG_DETAILS table which will have info
+	 * about msg sent and received.
+	 */
+	public static void CreateAndPopulateMSGTable(Connection con) throws Exception {
+
+		try {
+			Statement statement = con.createStatement();
 			// query to create table.
 			String sql1 = "CREATE TABLE MSG_DETAILS " + "(sentFrom BIGINT not NULL, " + " sentTo BIGINT not NULL, "
 					+ " message VARCHAR(255) not NULL," + " fromOperator VARCHAR(255), " + " toOperator VARCHAR(255), "
@@ -227,7 +241,7 @@ public class MobileOperatorDatabase {
 			// from mobile_operators where
 			// ranges=98149),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Received')";
 			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900001,981490000,'Hey',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Received')");
+					"INSERT into MSG_DETAILS values(9872900001,9814900000,'Hey',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Received')");
 			statement.addBatch(
 					"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
 			statement.addBatch(
@@ -259,9 +273,9 @@ public class MobileOperatorDatabase {
 			statement.addBatch(
 					"INSERT into MSG_DETAILS values(9814078900,9814000000,'YES!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
 			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814078900,9814000000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98109),NOW(),NOW(),'Received')");
+					"INSERT into MSG_DETAILS values(9814078900,9814000000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98108),NOW(),NOW(),'Received')");
 			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW()','Received')");
+					"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
 			statement.addBatch(
 					"INSERT into MSG_DETAILS values(9872600301,9814200000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),NOW(),NOW(),'Failed')");
 			statement.addBatch(
@@ -279,9 +293,9 @@ public class MobileOperatorDatabase {
 			statement.addBatch(
 					"INSERT into MSG_DETAILS values(9814078900,9872900301,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),NOW(),NOW(),'Received')");
 			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9878691266,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98786),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98786),NOW(),NOW(),'Received')");
+					"INSERT into MSG_DETAILS values(9872800301,9872691266,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98728 ),(SELECT operator from OPERATOR_DETAILS where ranges=98726),(SELECT region from OPERATOR_DETAILS where ranges=98728 ),(SELECT region from OPERATOR_DETAILS where ranges=98726),NOW(),NOW(),'Received')");
 			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9878691290,'Hii!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98786),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98786),NOW(),NOW(),'Failed')");
+					"INSERT into MSG_DETAILS values(9872800301,9872691290,'Hii!',(SELECT operator from OPERATOR_DETAILS where ranges=98728 ),(SELECT operator from OPERATOR_DETAILS where ranges=98726),(SELECT region from OPERATOR_DETAILS where ranges=98728 ),(SELECT region from OPERATOR_DETAILS where ranges=98726),NOW(),NOW(),'Failed')");
 			statement.executeBatch();
 			log.info("MSG_DETAILS table created successfully!");
 		} catch (Exception e) {
@@ -289,15 +303,20 @@ public class MobileOperatorDatabase {
 			throw new Exception("some error occured with MSG_DETAILS table.");
 		}
 	}
-    /*
-     * this function will execute all queries.
-     */
-	public static void finalQueryOutputs(Connection con, String dbName)
-			throws SQLException {
-		
+
+	/*
+	 * @param ->database name
+	 * @param -> connection
+	 * @throws second table function create MSG_DETAILS table which will have info
+	 * about msg sent and received.
+	 * 
+	 * this function will execute all queries.
+	 */
+	public static void finalQueryOutputs(Connection con, String dbName) throws SQLException {
+
 		Statement statement = con.createStatement();
-		String selectDb = "USE " + dbName; //selecting database
-        statement.executeUpdate(selectDb);
+		String selectDb = "USE " + dbName; // selecting database
+		statement.executeUpdate(selectDb);
 		/*
 		 * Scanner ob= new Scanner (System.in);
 		 * System.out.println("enter the mobile number which sent the messages");
@@ -360,6 +379,7 @@ public class MobileOperatorDatabase {
 			log.info(result7.getString("message"));
 		}
 	}
+
 	/*
 	 * fetches getFile function from readConfig file class
 	 */
