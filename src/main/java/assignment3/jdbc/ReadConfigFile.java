@@ -26,7 +26,7 @@ package assignment3.jdbc;
 				
 			}
 		}
-		public static String getResources(String key) {
+		public static String getResourceValues(String key) {
 			return property.getProperty(key);
 		}
 

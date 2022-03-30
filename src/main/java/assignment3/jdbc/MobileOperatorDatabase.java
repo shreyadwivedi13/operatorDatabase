@@ -32,7 +32,12 @@ import org.apache.logging.log4j.Logger;
 public class MobileOperatorDatabase {
 
 	public static final Logger log = LogManager.getLogger(MobileOperatorDatabase.class.getName());
-
+	public final static String DEFAULT_NAME_OPERATOR_RANGE = "operator_range";
+	// default name
+	public final static String DEFAULT_NAME_OPERATOR_REGION = "operator_region";
+	// default name
+	public final static String DEFAULT_NAME_MSG_INFO = "msg_info";
+	// default name
 	/*
 	 * @param - connection
 	 * 
@@ -42,44 +47,35 @@ public class MobileOperatorDatabase {
 	 * function will be called from main.
 	 * 
 	 */
-	public static void checkTables(Connection con) throws Exception {
-
+	public static void checkTables(Connection con, String[] table_name) throws Exception {
 		ResultSet rs = null;
 		try {
 			DatabaseMetaData databaseMetadata = con.getMetaData();
-			log.info("Checking if a operator range table already exists");
-			rs = databaseMetadata.getTables(null, null, "operator_range", null);
-			if (rs.next()) {
-				// System.out.println(rs.next());
-				log.info("operator_range exists");
-			} else {
-				log.info("operator_range doesn't exists");
-				createAndPolulateOperatorRange(con);
-			}
-			log.info("Checking if a operator region table already exists");
-			rs = databaseMetadata.getTables(null, null, "operator_region", null);
-			if (rs.next()) {
-				// System.out.println(rs.next());
-				log.info("operator_region exists");
-			} else {
-				log.info("operator_region doesn't exists");
-				createAndPolulateOperatorRegion(con);
-			}
-			log.info("Checking if a msg_info table already exists");
-			rs = databaseMetadata.getTables(null, null, "msg_info", null);
-			if (rs.next()) {
-				// System.out.println(rs.next());
-				log.info("msg_info exists");
-			} else {
-				log.info("msg_info doesn't exists");
-				createAndPopulateMSGTable(con);
+			for (int i = 0; i < table_name.length; i++) {
+				log.info("Checking if " + table_name[i] + " already exists.");
+				rs = databaseMetadata.getTables(null, null, table_name[i], null);
+				if (rs.next()) {
+					// System.out.println(rs.next());
+					log.info(table_name[i] + " exists");
+				} else {
+					log.info(table_name[i] + " doesn't exists");
+					if (i == 0) {
+						createAndPolulateOperatorRange(con);
+					} else if (i == 1) {
+						createAndPolulateOperatorRegion(con);
+					} else {
+						createAndPopulateMSGTable(con);
+						;
+					}
+				}
 			}
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.info(e.getMessage());
 			throw new Exception("Couldn't check the tables, some error occured");
-
 		}
 	}
+
+	
 
 	/*
 	 * @param ->connection
@@ -103,38 +99,19 @@ public class MobileOperatorDatabase {
 			statement.executeUpdate(sql);
 			log.info(" operator_range table created successfully!");
 			PreparedStatement ps = con.prepareStatement("insert into operator_range values(?,?)");
-			// creating table to simplify the ranges of phone numbers and their operators.
-			// specifying range for Airtel operator
-			int airtelRange = 9872;
-			ps.setInt(1, airtelRange);
-			ps.setString(2, "Airtel");
-			ps.addBatch();
-
-			// specifying range for Idea operator
-			int ideaRange = 9814;
-
-			ps.setInt(1, ideaRange);
-			ps.setString(2, "Idea");
-			ps.addBatch();
-
-			// specifying range for Vodafone operator
-			int vodaRange = 9867;
-
-			ps.setInt(1, vodaRange);
-			ps.setString(2, "Vodafone");
-			ps.addBatch();
-
-			// specifying range for Jio operator
-			int jioRange = 98320;
-
-			ps.setInt(1, jioRange);
-			ps.setString(2, "Jio");
-			ps.addBatch();
+			// creating table to simplify the ranges of phone numbers and their operators
+			int[] rangeArray = new int[] { 9872, 9814, 9867, 9832 }; // array of operator ranges
+			String[] operatorNames = new String[] { "Airtel", "Idea", "Vodafone", "Jio" };// array of operator names
+			for (int i = 0; i < rangeArray.length; i++) {
+				ps.setInt(1, rangeArray[i]);
+				ps.setString(1, operatorNames[i]);
+				ps.addBatch();
+			}
 			ps.executeBatch();
 			log.info("values in operator_range table have been inserted successfully!");
 
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.info(e.getMessage());
 			throw new Exception("some error occured with operator range table");
 		}
 	}
@@ -169,7 +146,7 @@ public class MobileOperatorDatabase {
 
 				log.info("values in operator_region table have been inserted successfully!");
 			} catch (SQLException e) {
-				System.out.println(e.getMessage());
+				log.info(e.getMessage());
 				throw new Exception("some error occured with operator_region table");
 
 			}
@@ -194,54 +171,45 @@ public class MobileOperatorDatabase {
 			statement.execute(sql1);
 			log.info("value inmsg_info table created successfully!");
 			// inserting values in the second table.
+			long[] senderPh = new long[] { 9872900001L, 9872900301L, 9862900301L, 9832777777L, 9814200000L, 9872900301L,
+					9814078900L, 9814078900L, 9872900301L, 9872900301L, 9872900301L, 9872900301L, 9832777777L,
+					9814200000L, 9872900301L, 9814078900L, 9814078900L, 9872900301L, 9872900301L, 9814678900L,
+					9872900301L, 9872900301L, 9814660000L, 9872900302L, 981468900L, 9814678900L, 9872600351L,
+					9872800301L, 9872600301L, 9872600301L, 9872600361L, 9872600301L, 9872900301L, 9872900301L,
+					9872900301L, 9872900301L, 9872900361L, 9872900301L, 9872600361L, 9872660301L, 9872670301L,
+					9872640361L };
+			long[] recipientPh = new long[] { 9814900000L, 9814000000L, 9814500000L, 9814900000L, 9832777777L,
+					9832777777L, 9814000000L, 9814000000L, 9814000000L, 9814200000L, 9814000000L, 9814500000L,
+					9814000000L, 9832777777L, 9832777777L, 9814000000L, 9814000000L, 9814000000L, 9814200000L,
+					9814000000L, 9814900000L, 9814200000L, 9872900301L, 9872900301L, 9872900301L, 9872900301L,
+					9872900301L, 9872691266L, 9872691290L, 9878691289L, 9872900301L, 9872900301L, 9872691266L,
+					9878691290L, 9878691289L, 9878691301L, 9878691201L, 9872600301L, 9872600301L, 9872600301L,
+					9872600301L, 9872600301L };
+			String[] msges = new String[] { "hey", "hi", "no", "stop", "ok", "what?", "!!", "bye", "okay", "how", "hey",
+					"hi", "no", "stop", "ok", "what?", "!!", "bye", "okay", "how", "hey", "hi", "no", "stop", "ok",
+					"what?", "!!", "bye", "okay", "how", "hey", "hi", "no", "stop", "ok", "what?", "!!", "bye", "okay",
+					"how", "hbd", "hbd" };
+			String[] status = new String[] { "Received", "Received", "Received", "Received", "Received", "Received",
+					"Received", "Received", "Received", "Received", "Received", "Received", "Received", "Received",
+					"Received", "Failed", "Received", "Received", "Received", "Received", "Failed", "Received",
+					"Received", "Received", "Received", "Failed", "Failed", "Failed", "Failed", "Failed", "Failed",
+					"Received", "Received", "Received", "Received", "Failed", "Failed", "Failed", "Failed", "Failed",
+					"Failed", "Failed" };
+			PreparedStatement prepapredStatement = con
+					.prepareStatement("INSERT INTO msg_info" + " VALUES (?, ?, ?,NOW(),NOW(), ?");
+			for (int i = 0; i < senderPh.length; i++) {
+				prepapredStatement.setLong(1, senderPh[i]);
+				prepapredStatement.setLong(2, recipientPh[i]);
+				prepapredStatement.setString(3, msges[i]);
+				prepapredStatement.setString(6, status[i]);
+				prepapredStatement.addBatch();
+			}
 
-			statement.addBatch("INSERT into msg_info values(9872900001,9814900000,'Hey',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9867900301,9814500000,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9832777777,9814000000,'??',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814200000,9832777777,'HBD!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9832777777,'HNY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'HI!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'HBD!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'HNY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9814200000,'BYE!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9867900301,9814500000,'BYE!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9832777777,9814000000,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814200000,9832777777,'NO!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9832777777,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'YES!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'OKAY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872600301,9814200000,'Hey!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9814678900,9814000000,'OKAY!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872600301,9814900000,'Hey!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872600301,9814200000,'Hey!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9814660000,9872900301,'NO!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872660302,9872900301,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814678900,9872900301,'YES!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9814078900,9872900301,'OKAY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872600351,9872900301,'TTYL!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872800301,9872691266,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872600301,9872691290,'Hii!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872600301,9878691289,'Hii!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872600361,9872900301,'Hail!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872600301,9872900301,'OKAY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9872691266,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9878691290,'Hii!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9878691289,'Hii!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872900361,9878691301,'Hail!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872900301,9878691201,'OKAY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872600303,9872600301,'OKAY!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872600361,9872600301,'Hey!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872660301,9872600301,'Hii!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872670301,9872600301,'Hii!',NOW(),NOW(),'Failed')");
-			statement.addBatch("INSERT into msg_info values(9872640361,9872600301,'Hail!',NOW(),NOW(),'Received')");
-			statement.addBatch("INSERT into msg_info values(9872678301,9872600301,'OKAY!',NOW(),NOW(),'Received')");
-			statement.executeBatch();
+			prepapredStatement.executeBatch();
+
 			log.info("value in msg_info table inserted successfully!");
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.info(e.getMessage());
 			throw new Exception("some error occured with msg_info table.");
 		}
 	}
@@ -255,134 +223,154 @@ public class MobileOperatorDatabase {
 	 */
 	public static void finalQueryOutputs(Connection con) throws Exception {
 		Statement statement = con.createStatement();
-		try (Scanner ob = new Scanner(System.in);) {
+		try (Scanner scanner = new Scanner(System.in);) {
 			int choice;
 			boolean countinuationChoice = true;
 			do {
 
-				System.out.println("Enter the specified number to execute following queries and 0 to exit : ");
-				System.out.println("1. Enter 1 to Print all messages sent from a given number. ");
-				System.out.println("2. Enter 2 to Print all messages to a given number. ");
-				System.out.println("3. Enter 3 to Print all messages sent between two years. ");
-				System.out.println("4. Enter 4 to Print all messages receieved by given number from punjab number. ");
-				System.out.println(
-						"5. Enter 5 to Print all messages receieved by given number from airtel punjab number. ");
-				System.out.println(
-						"6. Enter 6 to Print all messages sent by 98786912**, (Where ** could be any two digits). ");
-				System.out.println("7. Enter 7 to Print all messages sent from punjab but failed . ");
-				System.out.println("8. Enter 8 to exit. ");
+				log.info("Enter the specified number to execute following queries and 0 to exit : ");
+				log.info("1. Enter 1 to Print all messages sent from a given number. ");
+				log.info("2. Enter 2 to Print all messages to a given number. ");
+				log.info("3. Enter 3 to Print all messages sent between two years. ");
+				log.info("4. Enter 4 to Print all messages receieved by given number from punjab number. ");
+				log.info("5. Enter 5 to Print all messages receieved by given number from airtel punjab number. ");
+				log.info("6. Enter 6 to Print all messages sent by 98786912**, (Where ** could be any two digits). ");
+				log.info("7. Enter 7 to Print all messages sent from punjab but failed . ");
+				log.info("8. Enter 8 to exit. ");
 
-				choice = ob.nextInt();
+				choice = scanner.nextInt();
 				switch (choice) {
 				case 1: {
-					System.out.println("enter sender's number : ");
-					long sender = ob.nextLong();
-//					sample input->9872600301
-					String query1 = "SELECT message from msg_info where sentFrom = " + sender;
-					ResultSet rs = statement.executeQuery(query1);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+					query1(scanner, con, statement);
 					break;
 				}
 				case 2: {
-					System.out.println("enter recipient's number : ");
-					long recipient = ob.nextLong();
-//					sample input->9872600301
-					String query2 = "SELECT message from msg_info where sentFrom = " + recipient;
-					ResultSet rs = statement.executeQuery(query2);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+					
+					query2(scanner, con, statement);
 					break;
 				}
 				case 3: {
-					System.out.println("enter first year : ");
-					long year1 = ob.nextInt();
-//					sample input ->2021
-					System.out.println("enter second year : ");
-					long year2 = ob.nextInt();
-//					sample input -> 2022
-					String query3 = " SELECT message from msg_info where YEAR(sentTime) between " + year1 + " and "
-							+ year2;
-					ResultSet rs = statement.executeQuery(query3);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+					
+					
+					query3(scanner, con, statement);
 					break;
 				}
 				case 4: {
-					System.out.println("enter recipient's number : ");
-					long recipient = ob.nextLong();
-//					sample input->9872600301
-					String query4 = "Select a.message FROM msg_info A inner join operator_region b on FLOOR(((a.sentFrom/100000) %10)) = b.region_id "
-							+ "WHERE a.sentTo = " + recipient + " and b.region = 'Punjab'";
-					ResultSet rs = statement.executeQuery(query4);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+					
+					query4(scanner, con, statement);
 					break;
 				}
-				case 5: {
-					System.out.println("enter recipient's number : ");
-					long recipient = ob.nextLong();
-//					sample input->9872600301
-					String query5 = "Select A.message FROM msg_info A inner join operator_region b on FLOOR(((A.sentFrom/100000) %10)) = b.region_id inner join operator_range c on FLOOR(a.sentFrom/1000000) = c.ranges where  b.region = 'Punjab'and c.operator = 'Airtel' and a.sentTo = "
-							+ recipient;
-
-					ResultSet rs = statement.executeQuery(query5);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+				case 5:{
+					query5(scanner, con, statement);
 					break;
 				}
 				case 6: {
-					System.out.println("Enter the sender's number : ");
-					long sender = ob.nextLong();
-					// sample input->9872900301
-					String query6 = "Select MESSAGE FROM msg_info WHERE sentTo>9878691199 and sentTo<9878691300 and sentFrom = "
-							+ sender;
-					// String query6 = "SELECT message from msg_info where sentTo>9878691199 and
-					// sentTo<9878691300 and sentFrom = 9872900301";
-					ResultSet rs = statement.executeQuery(query6);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+					
+					query6(scanner, con, statement);
 					break;
 				}
 				case 7: {
-					String query7 = "Select A.MESSAGE FROM msg_info A INNER JOIN operator_region b on FLOOR(((a.sentFrom/100000) %10)) = b.region_id "
-							+ "WHERE a.deliverystatus = 'failed' and b.region = 'Punjab'";
-
-					ResultSet rs = statement.executeQuery(query7);
-					while (rs.next()) {
-						log.info("Message : " + rs.getString("message"));
-						
-					}
+					
+					query7(scanner, con, statement);
 					break;
 				}
 				case 8: {
-					System.out.println("Exiting query loop.");
+					log.info("Exiting query loop.");
 					countinuationChoice = false;
 					break;
 				}
 				default: {
-					System.out.println("Wrong input.");
+					log.info("Wrong input.");
 				}
 
 				}
 
 			} while (countinuationChoice == true);
 
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			throw new Exception("some error occured while executing the queries.");
+		}catch(
+
+	Exception e)
+	{
+		log.info(e.getMessage());
+		throw new Exception("some error occured while executing the queries.");
+	}
+	}
+
+	public static void query1(Scanner scanner, Connection con, Statement statement) throws Exception {
+		log.info("enter sender's number : ");
+		long sender = scanner.nextLong();
+//		sample input->9872600301
+		String query1 = "SELECT message from msg_info where sentFrom = " + sender;
+		ResultSet rs = statement.executeQuery(query1);
+		displayMessages(rs);
+	}
+
+	public static void query2(Scanner scanner, Connection con, Statement statement) throws Exception {
+		log.info("enter recipient's number : ");
+		long recipient = scanner.nextLong();
+//		sample input->9872600301
+		String query2 = "SELECT message from msg_info where sentFrom = " + recipient;
+		ResultSet rs = statement.executeQuery(query2);
+		displayMessages(rs);
+
+	}
+
+	public static void query3(Scanner scanner, Connection con, Statement statement) throws Exception {
+		log.info("enter first year : ");
+		long year1 = scanner.nextInt();
+//		sample input ->2021
+		log.info("enter second year : ");
+		long year2 = scanner.nextInt();
+//		sample input -> 2022
+		String query3 = " SELECT message from msg_info where YEAR(sentTime) between " + year1 + " and " + year2;
+		ResultSet rs = statement.executeQuery(query3);
+		displayMessages(rs);
+	}
+
+	public static void query4(Scanner scanner, Connection con, Statement statement) throws Exception {
+		log.info("enter recipient's number : ");
+		long recipient = scanner.nextLong();
+//		sample input->9872600301
+		String query4 = "Select msg.message FROM msg_info msg inner join operator_region op on FLOOR(((msg.sentFrom/100000) %10)) = op.region_id "
+				+ "WHERE msg.sentTo = " + recipient + " and op.region = 'Punjab'";
+		ResultSet rs = statement.executeQuery(query4);
+		displayMessages(rs);
+	}
+
+	public static void query5(Scanner scanner, Connection con, Statement statement) throws Exception {
+		log.info("enter recipient's number : ");
+		long recipient = scanner.nextLong();
+//		sample input->9872600301
+		String query5 = "Select msg.message FROM msg_info msg inner join operator_region op on FLOOR(((msg.sentFrom/100000) %10)) = op.region_id inner join operator_range opr on FLOOR(a.sentFrom/1000000) = opr.ranges where  op.region = 'Punjab'and opr.operator = 'Airtel' and msg.sentTo = "
+				+ recipient;
+
+		ResultSet rs = statement.executeQuery(query5);
+		displayMessages(rs);
+	}
+
+	public static void query6(Scanner scanner, Connection con, Statement statement) throws Exception {
+		log.info("Enter the sender's number : ");
+		long sender = scanner.nextLong();
+		// sample input->9872900301
+		String query6 = "Select MESSAGE FROM msg_info WHERE sentTo>9878691199 and sentTo<9878691300 and sentFrom = "
+				+ sender;
+		// String query6 = "SELECT message from msg_info where sentTo>9878691199 and
+		// sentTo<9878691300 and sentFrom = 9872900301";
+		ResultSet rs = statement.executeQuery(query6);
+		displayMessages(rs);
+	}
+
+	public static void query7(Scanner scanner, Connection con, Statement statement) throws Exception {
+		String query7 = "Select msg.MESSAGE FROM msg_info msg INNER JOIN operator_region op on FLOOR(((msg.sentFrom/100000) %10)) = op.region_id "
+				+ "WHERE msg.deliverystatus = 'failed' and op.region = 'Punjab'";
+
+		ResultSet rs = statement.executeQuery(query7);
+		displayMessages(rs);
+	}
+
+	public static void displayMessages(ResultSet rs) throws Exception {
+		while (rs.next()) {
+			log.info("Message : " + rs.getString("message"));
 		}
 	}
 
@@ -402,16 +390,16 @@ public class MobileOperatorDatabase {
 		try {
 			resourceIntializer();
 
-			String databaseURL = ReadConfigFile.getResources("databaseURL");
+			String databaseURL = ReadConfigFile.getResourceValues("databaseURL");
 			log.info("databaseURL" + databaseURL);
-			String user = ReadConfigFile.getResources("user");
+			String user = ReadConfigFile.getResourceValues("user");
 			log.info("username:" + user);
-			String password = ReadConfigFile.getResources("password");
+			String password = ReadConfigFile.getResourceValues("password");
 			log.info("password:" + password);
 //			String dbName = "network_operator";
 			Connection con = DriverManager.getConnection(databaseURL, user, password);
-
-			checkTables(con);
+			String table_name[] = new String[] { "operator_range", "operator_region", "msg_info" };
+			checkTables(con, table_name);
 			finalQueryOutputs(con);
 
 		} catch (Exception e) {

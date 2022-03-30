@@ -1,0 +1,8 @@
+2022-03-31 04:57:13,861 INFO a.j.MobileOperatorDatabase [main] Enter the specified number to execute following queries and 0 to exit : 
+2022-03-31 04:57:13,876 INFO a.j.MobileOperatorDatabase [main] 1. Enter 1 to Print all messages sent from a given number. 
+2022-03-31 04:57:13,876 INFO a.j.MobileOperatorDatabase [main] 2. Enter 2 to Print all messages to a given number. 
+2022-03-31 04:57:13,876 INFO a.j.MobileOperatorDatabase [main] 3. Enter 3 to Print all messages sent between two years. 
+2022-03-31 04:57:13,876 INFO a.j.MobileOperatorDatabase [main] 4. Enter 4 to Print all messages receieved by given number from punjab number. 
+2022-03-31 04:57:13,876 INFO a.j.MobileOperatorDatabase [main] 5. Enter 5 to Print all messages receieved by given number from airtel punjab number. 
+2022-03-31 04:57:13,877 INFO a.j.MobileOperatorDatabase [main] 6. Enter 6 to Print all messages sent by 98786912**, (Where ** could be any two digits). 
+2022-03-31 04:57:13,877 INFO a.j.MobileOperatorDatabase [main] 7. Enter 7 to Print all messages sent from punjab but failed . 
