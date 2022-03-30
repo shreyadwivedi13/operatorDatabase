@@ -1,6 +1,9 @@
 package assignment3.jdbc;
 
+import java.math.BigInteger;
 import java.sql.*;
+import java.util.Scanner;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 /*
@@ -31,352 +34,376 @@ public class MobileOperatorDatabase {
 	public static final Logger log = LogManager.getLogger(MobileOperatorDatabase.class.getName());
 
 	/*
-	 * @param -database name
-	 * 
 	 * @param - connection
 	 * 
-	 * @throws checking if the database already exists or not, if not then creating
-	 * a database with required dbName and then calling operator table creation
-	 * function otherwise directly the query function will be called from main.
+	 * @throws Exception checking if in the database the tables already exists or
+	 * not, if not then creating a tables with required columnName and then calling
+	 * their table creation and insertion function otherwise directly the query
+	 * function will be called from main.
 	 * 
 	 */
-	public static void checkDatabase(String dbName, Connection con) throws Exception {
+	public static void checkTables(Connection con) throws Exception {
 
 		ResultSet rs = null;
 		try {
-			if (con != null) {
-				log.info("Checking if a database by this name already exists");
-				rs = con.getMetaData().getCatalogs();
+			DatabaseMetaData databaseMetadata = con.getMetaData();
+			log.info("Checking if a operator range table already exists");
+			rs = databaseMetadata.getTables(null, null, "operator_range", null);
+			if (rs.next()) {
 				// System.out.println(rs.next());
-				boolean exists = false;
-				while (rs.next()) {
-					String catalogs = rs.getString(1);
-					// log.info(catalogs);
-					if (dbName.equals(catalogs)) {
-						System.out.println("the database " + dbName + " exists");
-						exists = true;
-						break;
-					} else {
-						exists = false;
-						// System.out.println("?");
-					}
-				}
-				log.info("db exists: " + exists);
-
-				if (exists == false) {
-					log.info("no database found with this name so creating new database");
-					Statement statement = con.createStatement();
-					String sql = "CREATE DATABASE " + dbName;
-					statement.executeUpdate(sql);
-					log.info("Database with name " + dbName + " created.");
-					String selectDb = "USE " + dbName; // selecting database
-					statement.executeUpdate(selectDb);
-					System.out.println(selectDb);
-					CreateAndPopulateOperatorTable(con);
-
-				}
+				log.info("operator_range exists");
+			} else {
+				log.info("operator_range doesn't exists");
+				createAndPolulateOperatorRange(con);
+			}
+			log.info("Checking if a operator region table already exists");
+			rs = databaseMetadata.getTables(null, null, "operator_region", null);
+			if (rs.next()) {
+				// System.out.println(rs.next());
+				log.info("operator_region exists");
+			} else {
+				log.info("operator_region doesn't exists");
+				createAndPolulateOperatorRegion(con);
+			}
+			log.info("Checking if a msg_info table already exists");
+			rs = databaseMetadata.getTables(null, null, "msg_info", null);
+			if (rs.next()) {
+				// System.out.println(rs.next());
+				log.info("msg_info exists");
+			} else {
+				log.info("msg_info doesn't exists");
+				createAndPopulateMSGTable(con);
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			throw new Exception("Couldn't create the database, some error occured");
+			throw new Exception("Couldn't check the tables, some error occured");
 
 		}
 	}
 
 	/*
-	 * @param ->database name
-	 * 
 	 * @param ->connection
 	 * 
-	 * @throws this function will create OPERATOR_DETAILS table which will have
-	 * specified ranges divided in operators and regions and will connect to the
-	 * MSG_Detail function if it runs properly otherwise will throw and error.
-	 * input:
+	 * @throws Exception
+	 * 
+	 * this function will create operator_range table which will have specified
+	 * ranges divided in operators if it runs properly otherwise will throw and
+	 * error.
+	 * 
 	 */
-	public static void CreateAndPopulateOperatorTable(Connection con) throws Exception {
-
-		String[] regions = new String[] { "UP", "HP", "MP", "Kerala", "Goa",  "Assam","Punjab", "Haryana", "Bihar",
-				"Karnataka" };
-		// creating a string of all the regions of the operator
+	public static void createAndPolulateOperatorRange(Connection con) throws Exception {
 
 		try {
 			Statement statement = con.createStatement();
-			// creating table1 ie OPERATOR_DETAILS which will have the ranges of the
-			// operators and their regions.
-			String sql = "CREATE TABLE OPERATOR_DETAILS " + "(ranges INTEGER , " + " operator VARCHAR(255), "
-					+ " region VARCHAR(255)) ";
+			// creating table1 ie operator_range which will have the ranges of the
+			// operators
+			String sql = "CREATE TABLE operator_range " + "(ranges INTEGER , " + " operator VARCHAR(255), "
+					+ " PRIMARY KEY ( ranges )) ";
 
 			statement.executeUpdate(sql);
-
-			PreparedStatement ps = con.prepareStatement("insert into OPERATOR_DETAILS values(?,?,?)");
+			log.info(" operator_range table created successfully!");
+			PreparedStatement ps = con.prepareStatement("insert into operator_range values(?,?)");
 			// creating table to simplify the ranges of phone numbers and their operators.
-			// specifying range for regions of Airtel operator
-			int airtelRange = 98720;
-			for (int i = 0; i < regions.length; i++) {
-				ps.setInt(1, airtelRange);
-				ps.setString(2, "Airtel");
-				ps.setString(3, regions[i]);
-				ps.addBatch();
-				airtelRange++;
+			// specifying range for Airtel operator
+			int airtelRange = 9872;
+			ps.setInt(1, airtelRange);
+			ps.setString(2, "Airtel");
+			ps.addBatch();
 
-			}
-			// specifying range for regions of Idea operator
-			int ideaRange = 98140;
-			for (int i = 0; i < regions.length; i++) {
-				ps.setInt(1, ideaRange);
-				ps.setString(2, "Idea");
-				ps.setString(3, regions[i]);
-				ps.addBatch();
-				ideaRange++;
-			}
+			// specifying range for Idea operator
+			int ideaRange = 9814;
 
-			// specifying range for regions of Vodafone operator
-			int vodaRange = 98670;
-			for (int i = 0; i < regions.length; i++) {
-				ps.setInt(1, vodaRange);
-				ps.setString(2, "Vodafone");
-				ps.setString(3, regions[i]);
-				ps.addBatch();
-				vodaRange++;
-			}
+			ps.setInt(1, ideaRange);
+			ps.setString(2, "Idea");
+			ps.addBatch();
 
-			// specifying range for regions of Jio operator
+			// specifying range for Vodafone operator
+			int vodaRange = 9867;
+
+			ps.setInt(1, vodaRange);
+			ps.setString(2, "Vodafone");
+			ps.addBatch();
+
+			// specifying range for Jio operator
 			int jioRange = 98320;
 
-			for (int i = 0; i < regions.length; i++) {
-				ps.setInt(1, jioRange);
-				ps.setString(2, "Jio");
-				ps.setString(3, regions[i]);
-				ps.addBatch();
-				jioRange++;
-			}
-
+			ps.setInt(1, jioRange);
+			ps.setString(2, "Jio");
+			ps.addBatch();
 			ps.executeBatch();
-			log.info("OPERATOR_DETAILS table created successfully!");
-			CreateAndPopulateMSGTable(con);
-			// calling second table function for saving message details.
+			log.info("values in operator_range table have been inserted successfully!");
 
 		} catch (Exception e) {
-			throw new Exception("some error occured with operator table" + e);
+			System.out.println(e.getMessage());
+			throw new Exception("some error occured with operator range table");
 		}
 	}
 
 	/*
-	 * @param ->database name
-	 * 
 	 * @param ->connection
 	 * 
-	 * @throws second table function create MSG_DETAILS table which will have info
-	 * about msg sent and received.
+	 * @throws Exception second table function create operator_region table which
+	 * will have info about operator region and region id.
 	 */
-	public static void CreateAndPopulateMSGTable(Connection con) throws Exception {
+	public static void createAndPolulateOperatorRegion(Connection con) throws Exception {
+		{
+			try (Statement stmt = con.createStatement();) {
+				String sql = "CREATE TABLE operator_region" + "(region_id INT not NULL, " + " region VARCHAR(255), "
+						+ " PRIMARY KEY (region_id ))";
+
+				stmt.executeUpdate(sql);
+				log.info("Created operator region table successfully! ");
+				String[] regions = new String[] { "UP", "HP", "MP", "Kerala", "Goa", "Assam", "Punjab", "Haryana",
+						"Bihar", "Karnataka" };// storing all the operator regions in a string array.
+
+				PreparedStatement prepapredStatement = con
+						.prepareStatement("INSERT INTO operator_region" + " VALUES (?, ?)");
+				// iterating over the string array to assign them with their region ids.
+				for (int i = 0; i < regions.length; i++) {
+					prepapredStatement.setInt(1, i);
+					prepapredStatement.setString(2, regions[i]);
+					prepapredStatement.addBatch();
+				}
+
+				prepapredStatement.executeBatch();
+
+				log.info("values in operator_region table have been inserted successfully!");
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				throw new Exception("some error occured with operator_region table");
+
+			}
+		}
+	}
+
+	/*
+	 * @param ->connection
+	 * 
+	 * @throws Exception second table function create msg_info table which will have
+	 * info about msg sent and received.
+	 */
+	public static void createAndPopulateMSGTable(Connection con) throws Exception {
 
 		try {
 			Statement statement = con.createStatement();
 			// query to create table.
-			String sql1 = "CREATE TABLE MSG_DETAILS " + "(sentFrom BIGINT not NULL, " + " sentTo BIGINT not NULL, "
-					+ " message VARCHAR(255) not NULL," + " fromOperator VARCHAR(255), " + " toOperator VARCHAR(255), "
-					+ " FromRegion VARCHAR(255), " + " toRegion VARCHAR(255), "
-					+ " sentTime TIMESTAMP default current_timestamp, " + " recievedTime TIMESTAMP  ,"
-					+ " deliveryStatus VARCHAR(255)" + ")";
+			String sql1 = "CREATE TABLE msg_info " + "(sentFrom BIGINT not NULL, " + " sentTo BIGINT not NULL, "
+					+ " message VARCHAR(255) not NULL," + " sentTime TIMESTAMP, " + " recievedTime TIMESTAMP  ,"
+					+ " deliveryStatus VARCHAR(255))";
 
 			statement.execute(sql1);
+			log.info("value inmsg_info table created successfully!");
 			// inserting values in the second table.
 
-			/*
-			 * Scanner ob = new Scanner(System.in);
-			 * System.out.println("Enter the number of entries you'll like to make."); int
-			 * entryCount = ob.nextInt(); if (entryCount > 0) { for (int i = 0; i <
-			 * entryCount; i++) {
-			 * System.out.println("enter the mobile number which sent the messages"); long
-			 * sentFrom = ob.nextLong(); System.out.println(sentFrom); while (sentFrom >
-			 * 99999) { // extracting the first 5 digits to fetch the range sentFrom =
-			 * sentFrom / 10; } int SentRange = (int) sentFrom;// range of number from which
-			 * the msg was sent
-			 * 
-			 * // getting details of the operator and region of the receiver from the
-			 * operator // table ResultSet rs = statement.executeQuery(
-			 * "select operators,region from mobile_operators where ranges=" + SentRange +
-			 * ""); rs.next(); String fromOperator = rs.getString(1); String FromRegion =
-			 * rs.getString(2);
-			 * 
-			 * System.out.println("enter the mobile number to which the messages was sent "
-			 * ); long sentTo = ob.nextLong();
-			 * 
-			 * while (sentFrom > 99999) { // extracting the first 5 digits to fetch the
-			 * range sentTo = sentTo / 10; } int ToRange = (int) sentTo;// range of number
-			 * from which the msg was sent
-			 * 
-			 * // getting details of the operator and region of the receiver from the
-			 * operator // table ResultSet rs1 = statement
-			 * .executeQuery("select operators,region from mobile_operators where ranges=" +
-			 * ToRange + ""); rs1.next(); String toOperator = rs1.getString(1); String
-			 * toRegion = rs1.getString(2); System.out.println("enter the message."); String
-			 * message = ob.nextLine();
-			 * 
-			 * System.out.println("enter the time of the sending msg."); String sentTime =
-			 * ob.nextLine();
-			 * 
-			 * System.out.println("enter the time of recieving msg."); String ReceivedTime =
-			 * ob.nextLine();
-			 * 
-			 * System.out.println("enter the delivery status"); String deliveryStatus =
-			 * ob.nextLine();
-			 * 
-			 * PreparedStatement ps = con.prepareStatement(
-			 * "insert into messages values(?,?,?,?,?,?,?,?,?,?)");
-			 * 
-			 * ps.setLong(1, sentFrom); ps.setLong(2, sentTo); ps.setString(3, message);
-			 * ps.setString(4, fromOperator); ps.setString(5, toOperator); ps.setString(6,
-			 * FromRegion); ps.setString(7, toRegion); ps.setString(8, sentTime);
-			 * ps.setString(9, ReceivedTime); ps.setString(10, deliveryStatus); }
-			 * 
-			 * } else { log.info("no entries made to the msg table."); } } catch (Exception
-			 * e) { throw new Exception("some error with msg table."); } }
-			 */
-			// String newsql ="insert into MSG_DETAILS values(9872900001, 9814900001,'This
-			// is message 2',(select operators from mobile_operators where
-			// ranges=98729),(select region from mobile_operators where ranges=98729
-			// ),(select operators from mobile_operators where ranges=98149),(select region
-			// from mobile_operators where
-			// ranges=98149),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Received')";
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900001,9814900000,'Hey',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9867900301,9814500000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98679 ),(SELECT operator from OPERATOR_DETAILS where ranges=98145),(SELECT region from OPERATOR_DETAILS where ranges=98679 ),(SELECT region from OPERATOR_DETAILS where ranges=98145),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9832777777,9814000000,'??',(SELECT operator from OPERATOR_DETAILS where ranges=98327 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98327 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814200000,9832777777,'HBD!',(SELECT operator from OPERATOR_DETAILS where ranges=98142 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98142 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9832777777,'HNY!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814078900,9814000000,'HI!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814078900,9814000000,'HBD!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9814000000,'HNY!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9814200000,'BYE!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9867900301,9814500000,'BYE!',(SELECT operator from OPERATOR_DETAILS where ranges=98679 ),(SELECT operator from OPERATOR_DETAILS where ranges=98145),(SELECT region from OPERATOR_DETAILS where ranges=98679 ),(SELECT region from OPERATOR_DETAILS where ranges=98145),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9832777777,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98327 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98327 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814200000,9832777777,'NO!',(SELECT operator from OPERATOR_DETAILS where ranges=98142 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98142 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9832777777,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98327),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98327),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814078900,9814000000,'YES!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814078900,9814000000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98108),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872900301,9814000000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98729 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98729 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872600301,9814200000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),NOW(),NOW(),'Failed')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814678900,9814000000,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98146 ),(SELECT operator from OPERATOR_DETAILS where ranges=98140),(SELECT region from OPERATOR_DETAILS where ranges=98146 ),(SELECT region from OPERATOR_DETAILS where ranges=98140),NOW(),NOW(),'Failed')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872600301,9814900000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98149),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98149),NOW(),NOW(),'Failed')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872600301,9814200000,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98142),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98142),NOW(),NOW(),'Failed')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814660000,9872900301,'NO!',(SELECT operator from OPERATOR_DETAILS where ranges=98146 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98146 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872660302,9872900301,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98726 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98726 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814678900,9872900301,'YES!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98146 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9814078900,9872900301,'OKAY!',(SELECT operator from OPERATOR_DETAILS where ranges=98140 ),(SELECT operator from OPERATOR_DETAILS where ranges=98729),(SELECT region from OPERATOR_DETAILS where ranges=98140 ),(SELECT region from OPERATOR_DETAILS where ranges=98729),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872800301,9872691266,'Hey!',(SELECT operator from OPERATOR_DETAILS where ranges=98728 ),(SELECT operator from OPERATOR_DETAILS where ranges=98726),(SELECT region from OPERATOR_DETAILS where ranges=98728 ),(SELECT region from OPERATOR_DETAILS where ranges=98726),NOW(),NOW(),'Received')");
-			statement.addBatch(
-					"INSERT into MSG_DETAILS values(9872800301,9872691290,'Hii!',(SELECT operator from OPERATOR_DETAILS where ranges=98728 ),(SELECT operator from OPERATOR_DETAILS where ranges=98726),(SELECT region from OPERATOR_DETAILS where ranges=98728 ),(SELECT region from OPERATOR_DETAILS where ranges=98726),NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872900001,9814900000,'Hey',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9867900301,9814500000,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9832777777,9814000000,'??',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814200000,9832777777,'HBD!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9832777777,'HNY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'HI!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'HBD!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'HNY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9814200000,'BYE!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9867900301,9814500000,'BYE!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9832777777,9814000000,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814200000,9832777777,'NO!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9832777777,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'YES!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814078900,9814000000,'OKAY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9814000000,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872600301,9814200000,'Hey!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9814678900,9814000000,'OKAY!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872600301,9814900000,'Hey!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872600301,9814200000,'Hey!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9814660000,9872900301,'NO!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872660302,9872900301,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814678900,9872900301,'YES!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9814078900,9872900301,'OKAY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872600351,9872900301,'TTYL!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872800301,9872691266,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872600301,9872691290,'Hii!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872600301,9878691289,'Hii!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872600361,9872900301,'Hail!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872600301,9872900301,'OKAY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9872691266,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9878691290,'Hii!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9878691289,'Hii!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872900361,9878691301,'Hail!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872900301,9878691201,'OKAY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872600303,9872600301,'OKAY!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872600361,9872600301,'Hey!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872660301,9872600301,'Hii!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872670301,9872600301,'Hii!',NOW(),NOW(),'Failed')");
+			statement.addBatch("INSERT into msg_info values(9872640361,9872600301,'Hail!',NOW(),NOW(),'Received')");
+			statement.addBatch("INSERT into msg_info values(9872678301,9872600301,'OKAY!',NOW(),NOW(),'Received')");
 			statement.executeBatch();
-			log.info("MSG_DETAILS table created successfully!");
+			log.info("value in msg_info table inserted successfully!");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			throw new Exception("some error occured with MSG_DETAILS table.");
+			throw new Exception("some error occured with msg_info table.");
 		}
 	}
 
 	/*
-	 * @param ->database name
 	 * @param -> connection
-	 * @throws second table function create MSG_DETAILS table which will have info
-	 * about msg sent and received.
+	 * 
+	 * @throws Exception
 	 * 
 	 * this function will execute all queries.
 	 */
-	public static void finalQueryOutputs(Connection con, String dbName) throws SQLException {
-
+	public static void finalQueryOutputs(Connection con) throws Exception {
 		Statement statement = con.createStatement();
-		String selectDb = "USE " + dbName; // selecting database
-		statement.executeUpdate(selectDb);
-		/*
-		 * Scanner ob= new Scanner (System.in);
-		 * System.out.println("enter the mobile number which sent the messages");
-		 * BigInteger phone1= ob.nextBigInteger(); System.out.
-		 * println("enter the mobile number to which the messages where sent.");
-		 * BigInteger phone2= ob.nextBigInteger(); if(phone1!=null) { Boolean
-		 * check="SELECT MSG_DETAILS FROM to WHERE EXISTS
-		 */
-		/*
-		 * long phone1= 9872900301; long phone2= 9832777777;
-		 */
-		log.info("-----------------------------------------------");
-		log.info("print all messages sent from *** number To any number.");
-		String query1 = "SELECT message from MSG_DETAILS where sentFrom = 9872900301";
-		ResultSet result1 = statement.executeQuery(query1);
-		while (result1.next()) {
-			log.info(result1.getString("message"));
-		}
-		log.info("-----------------------------------------------");
-		log.info("print all messages received by * from any number");
-		String query2 = "SELECT message from MSG_DETAILS where sentTo = 9872900301";
-		ResultSet result2 = statement.executeQuery(query2);
-		while (result2.next()) {
-			log.info(result2.getString("message"));
-		}
-		log.info("-----------------------------------------------");
-		log.info("print all messages sent from XXXX to YYYY");
-		String query3 = " SELECT message from MSG_DETAILS where YEAR(sentTime) between 2021 and 2022";
-		ResultSet result3 = statement.executeQuery(query3);
-		while (result3.next()) {
-			log.info(result3.getString("message"));
-		}
-		log.info("-----------------------------------------------");
-		log.info("print all messages received by * from Punjab number");
-		String query4 = "SELECT message from MSG_DETAILS where sentTo = 9872900301 and fromRegion = 'Punjab' ";
-		ResultSet result4 = statement.executeQuery(query4);
-		while (result4.next()) {
-			log.info(result4.getString("message"));
-		}
-		log.info("-----------------------------------------------");
-		log.info("print all messages received by * from Airtel Punjab number");
-		String query5 = "SELECT message from MSG_DETAILS where sentTo= 9872900301 and fromOperator= 'Airtel' and fromRegion = 'Punjab'";
-		ResultSet result5 = statement.executeQuery(query5);
-		while (result5.next()) {
-			log.info(result5.getString("message"));
-		}
-		log.info("-----------------------------------------------");
-		log.info(
-				"print all messages received from 98786912** ( here * mean it can by any two digit, i.e. messages from 9878691291,92,93,94,95 etc..) by **.");
-		String query6 = "SELECT message from MSG_DETAILS where sentTo>9878691199 and sentTo<9878691300 and sentFrom = 9872900301";
-		ResultSet result6 = statement.executeQuery(query6);
-		while (result6.next()) {
-			log.info(result6.getString("message"));
-		}
-		log.info("-----------------------------------------------");
-		log.info("print all messages those were sent from Punjab number but FAILED");
-		String query7 = "SELECT message from MSG_DETAILS where fromRegion = 'Punjab' and deliveryStatus ='Failed'";
-		ResultSet result7 = statement.executeQuery(query7);
-		while (result7.next()) {
-			log.info(result7.getString("message"));
+		try (Scanner ob = new Scanner(System.in);) {
+			int choice;
+			boolean countinuationChoice = true;
+			do {
+
+				System.out.println("Enter the specified number to execute following queries and 0 to exit : ");
+				System.out.println("1. Enter 1 to Print all messages sent from a given number. ");
+				System.out.println("2. Enter 2 to Print all messages to a given number. ");
+				System.out.println("3. Enter 3 to Print all messages sent between two years. ");
+				System.out.println("4. Enter 4 to Print all messages receieved by given number from punjab number. ");
+				System.out.println(
+						"5. Enter 5 to Print all messages receieved by given number from airtel punjab number. ");
+				System.out.println(
+						"6. Enter 6 to Print all messages sent by 98786912**, (Where ** could be any two digits). ");
+				System.out.println("7. Enter 7 to Print all messages sent from punjab but failed . ");
+				System.out.println("8. Enter 8 to exit. ");
+
+				choice = ob.nextInt();
+				switch (choice) {
+				case 1: {
+					System.out.println("enter sender's number : ");
+					long sender = ob.nextLong();
+//					sample input->9872600301
+					String query1 = "SELECT message from msg_info where sentFrom = " + sender;
+					ResultSet rs = statement.executeQuery(query1);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 2: {
+					System.out.println("enter recipient's number : ");
+					long recipient = ob.nextLong();
+//					sample input->9872600301
+					String query2 = "SELECT message from msg_info where sentFrom = " + recipient;
+					ResultSet rs = statement.executeQuery(query2);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 3: {
+					System.out.println("enter first year : ");
+					long year1 = ob.nextInt();
+//					sample input ->2021
+					System.out.println("enter second year : ");
+					long year2 = ob.nextInt();
+//					sample input -> 2022
+					String query3 = " SELECT message from msg_info where YEAR(sentTime) between " + year1 + " and "
+							+ year2;
+					ResultSet rs = statement.executeQuery(query3);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 4: {
+					System.out.println("enter recipient's number : ");
+					long recipient = ob.nextLong();
+//					sample input->9872600301
+					String query4 = "Select a.message FROM msg_info A inner join operator_region b on FLOOR(((a.sentFrom/100000) %10)) = b.region_id "
+							+ "WHERE a.sentTo = " + recipient + " and b.region = 'Punjab'";
+					ResultSet rs = statement.executeQuery(query4);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 5: {
+					System.out.println("enter recipient's number : ");
+					long recipient = ob.nextLong();
+//					sample input->9872600301
+					String query5 = "Select A.message FROM msg_info A inner join operator_region b on FLOOR(((A.sentFrom/100000) %10)) = b.region_id inner join operator_range c on FLOOR(a.sentFrom/1000000) = c.ranges where  b.region = 'Punjab'and c.operator = 'Airtel' and a.sentTo = "
+							+ recipient;
+
+					ResultSet rs = statement.executeQuery(query5);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 6: {
+					System.out.println("Enter the sender's number : ");
+					long sender = ob.nextLong();
+					// sample input->9872900301
+					String query6 = "Select MESSAGE FROM msg_info WHERE sentTo>9878691199 and sentTo<9878691300 and sentFrom = "
+							+ sender;
+					// String query6 = "SELECT message from msg_info where sentTo>9878691199 and
+					// sentTo<9878691300 and sentFrom = 9872900301";
+					ResultSet rs = statement.executeQuery(query6);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 7: {
+					String query7 = "Select A.MESSAGE FROM msg_info A INNER JOIN operator_region b on FLOOR(((a.sentFrom/100000) %10)) = b.region_id "
+							+ "WHERE a.deliverystatus = 'failed' and b.region = 'Punjab'";
+
+					ResultSet rs = statement.executeQuery(query7);
+					int msg_count = statement.getUpdateCount();
+					while (rs.next()) {
+						log.info("Message : " + rs.getString("message"));
+						if (msg_count == -1) {
+							log.info("No messages found.");
+						}
+					}
+					break;
+				}
+				case 8: {
+					System.out.println("Exiting query loop.");
+					countinuationChoice = false;
+					break;
+				}
+				default: {
+					System.out.println("Wrong input.");
+				}
+
+				}
+
+			} while (countinuationChoice == true);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			throw new Exception("some error occured while executing the queries.");
 		}
 	}
 
@@ -402,11 +429,11 @@ public class MobileOperatorDatabase {
 			log.info("username:" + user);
 			String password = ReadConfigFile.getResources("password");
 			log.info("password:" + password);
-			String dbName = "network_operator";
+//			String dbName = "network_operator";
 			Connection con = DriverManager.getConnection(databaseURL, user, password);
 
-			checkDatabase(dbName, con);
-			finalQueryOutputs(con, dbName);
+			checkTables(con);
+			finalQueryOutputs(con);
 
 		} catch (Exception e) {
 			log.fatal("some error occured." + e);
