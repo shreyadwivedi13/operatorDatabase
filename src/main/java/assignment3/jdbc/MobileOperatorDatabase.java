@@ -280,12 +280,9 @@ public class MobileOperatorDatabase {
 //					sample input->9872600301
 					String query1 = "SELECT message from msg_info where sentFrom = " + sender;
 					ResultSet rs = statement.executeQuery(query1);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
@@ -295,12 +292,9 @@ public class MobileOperatorDatabase {
 //					sample input->9872600301
 					String query2 = "SELECT message from msg_info where sentFrom = " + recipient;
 					ResultSet rs = statement.executeQuery(query2);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
@@ -314,12 +308,9 @@ public class MobileOperatorDatabase {
 					String query3 = " SELECT message from msg_info where YEAR(sentTime) between " + year1 + " and "
 							+ year2;
 					ResultSet rs = statement.executeQuery(query3);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
@@ -330,12 +321,9 @@ public class MobileOperatorDatabase {
 					String query4 = "Select a.message FROM msg_info A inner join operator_region b on FLOOR(((a.sentFrom/100000) %10)) = b.region_id "
 							+ "WHERE a.sentTo = " + recipient + " and b.region = 'Punjab'";
 					ResultSet rs = statement.executeQuery(query4);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
@@ -347,12 +335,9 @@ public class MobileOperatorDatabase {
 							+ recipient;
 
 					ResultSet rs = statement.executeQuery(query5);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
@@ -365,12 +350,9 @@ public class MobileOperatorDatabase {
 					// String query6 = "SELECT message from msg_info where sentTo>9878691199 and
 					// sentTo<9878691300 and sentFrom = 9872900301";
 					ResultSet rs = statement.executeQuery(query6);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
@@ -379,12 +361,9 @@ public class MobileOperatorDatabase {
 							+ "WHERE a.deliverystatus = 'failed' and b.region = 'Punjab'";
 
 					ResultSet rs = statement.executeQuery(query7);
-					int msg_count = statement.getUpdateCount();
 					while (rs.next()) {
 						log.info("Message : " + rs.getString("message"));
-						if (msg_count == -1) {
-							log.info("No messages found.");
-						}
+						
 					}
 					break;
 				}
